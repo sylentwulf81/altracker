@@ -1,0 +1,6 @@
+{
+  "name": "ALT Dispatch Hub",
+  "description": "Progressive Web App for Assistant Language Teachers (ALTs) in Japan to track multi-school schedules, classes, co-teachers, lesson notes, and export formatted dispatch and BOE reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

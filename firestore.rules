@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // User schools
+    match /users/{userId}/schools/{schoolId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // User teachers
+    match /users/{userId}/teachers/{teacherId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // User classes
+    match /users/{userId}/classes/{classId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // User lessons
+    match /users/{userId}/lessons/{lessonId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
