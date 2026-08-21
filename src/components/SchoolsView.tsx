@@ -79,7 +79,7 @@ export const SchoolsView: React.FC<SchoolsViewProps> = ({
     if (!name.trim()) return;
 
     const school: School = {
-      id: editingSchool ? editingSchool.id : 'sch-' + Date.now(),
+      id: editingSchool ? editingSchool.id : crypto.randomUUID(),
       name: name.trim(),
       nameJp: nameJp.trim() || undefined,
       type,

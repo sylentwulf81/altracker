@@ -86,7 +86,7 @@ export const FastLessonLoggerModal: React.FC<FastLessonLoggerModalProps> = ({
     e.preventDefault();
     if (!selectedSchoolId || !selectedTeacherId || !selectedClassId || !date) return;
     onSaveLesson({
-      id: editingLesson ? editingLesson.id : 'les-' + Date.now(),
+      id: editingLesson ? editingLesson.id : crypto.randomUUID(),
       schoolId: selectedSchoolId,
       teacherId: selectedTeacherId,
       classRosterId: selectedClassId,

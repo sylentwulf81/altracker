@@ -83,7 +83,7 @@ export const TeachersAndClassesView: React.FC<TeachersAndClassesViewProps> = ({
     if (!tName.trim() || !tSchoolId) return;
 
     const teacher: Teacher = {
-      id: editingTeacher ? editingTeacher.id : 'tch-' + Date.now(),
+      id: editingTeacher ? editingTeacher.id : crypto.randomUUID(),
       schoolId: tSchoolId,
       name: tName.trim(),
       nameJp: tNameJp.trim() || undefined,
@@ -121,7 +121,7 @@ export const TeachersAndClassesView: React.FC<TeachersAndClassesViewProps> = ({
     if (!cClassIdentifier.trim() || !cSchoolId) return;
 
     const classRoster: ClassRoster = {
-      id: editingClass ? editingClass.id : 'cls-' + Date.now(),
+      id: editingClass ? editingClass.id : crypto.randomUUID(),
       schoolId: cSchoolId,
       gradeLevel: cGradeLevel.trim(),
       classIdentifier: cClassIdentifier.trim(),

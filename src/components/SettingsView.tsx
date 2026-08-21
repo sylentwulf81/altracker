@@ -16,7 +16,7 @@ import {
   CloudDownload,
   User as UserIcon,
 } from 'lucide-react';
-import { User } from 'firebase/auth';
+import { User } from '../db/auth';
 import { School, Teacher, ClassRoster, Lesson } from '../types';
 
 interface SettingsViewProps {
@@ -26,7 +26,6 @@ interface SettingsViewProps {
   lessons: Lesson[];
   user: User | null;
   onOpenProfile: () => void;
-  onResetSeedData: () => Promise<void>;
   onClearAllData: () => Promise<void>;
   onImportData: (data: { schools: School[]; teachers: Teacher[]; classes: ClassRoster[]; lessons: Lesson[] }) => Promise<void>;
 }
@@ -38,26 +37,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   lessons,
   user,
   onOpenProfile,
-  onResetSeedData,
   onClearAllData,
   onImportData,
 }) => {
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [isResetting, setIsResetting] = useState(false);
 
   const showToast = (msg: string) => {
     setFeedback(msg);
     setTimeout(() => setFeedback(null), 3500);
   };
 
-  const handleReset = async () => {
-    if (window.confirm('Reset all data to sample schools, teachers, and current week lessons?')) {
-      setIsResetting(true);
-      await onResetSeedData();
-      setIsResetting(false);
-      showToast('Successfully reloaded sample dispatch data for this week!');
-    }
-  };
 
   const handleClear = async () => {
     if (window.confirm('WARNING: Are you sure you want to erase all data? This cannot be undone.')) {
@@ -158,7 +147,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
         <p className="text-xs text-slate-600 leading-relaxed">
           {user
-            ? `Logged in as ${user.displayName || user.email}. Your dispatch records are securely saved in Firebase Firestore database.`
+            ? `Logged in as ${user.user_metadata?.full_name || user.email}. Your dispatch records are saved in Supabase and synced across your devices.`
             : 'Sign in with your Google account to back up your lesson notes and synchronize schedules across multiple devices.'}
         </p>
 
@@ -208,26 +197,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         <h3 className="text-sm font-bold text-slate-900">Data Management & Backups</h3>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Seed Data Reset */}
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center space-x-2 font-bold text-xs text-slate-900">
-                <RefreshCw className="w-4 h-4 text-sky-600" />
-                <span>Pre-Seed Sample Data</span>
-              </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                Generates 3 sample schools (ES/JHS/HS), 5 teachers (JTE/HRT), 5 classes, and 6 sample lessons for this week.
-              </p>
-            </div>
-            <button
-              id="reset-seed-btn"
-              onClick={handleReset}
-              disabled={isResetting}
-              className="mt-3 px-3 py-2 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
-            >
-              {isResetting ? 'Reloading...' : 'Reload Sample Data (今週のサンプル生成)'}
-            </button>
-          </div>
 
           {/* Backup & Restore */}
           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex flex-col justify-between">

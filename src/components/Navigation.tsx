@@ -8,7 +8,7 @@ import {
   User as UserIcon,
   Cloud,
 } from 'lucide-react';
-import { User } from 'firebase/auth';
+import { User } from '../db/auth';
 import { ActiveTab } from '../types';
 
 interface NavigationProps {
