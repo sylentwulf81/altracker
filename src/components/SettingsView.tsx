@@ -15,9 +15,11 @@ import {
   CloudUpload,
   CloudDownload,
   User as UserIcon,
+  Clock,
 } from 'lucide-react';
 import { User } from '../db/auth';
 import { School, Teacher, ClassRoster, Lesson } from '../types';
+import { AUTO_LOGOUT_OPTIONS } from '../hooks/useInactivityLogout';
 
 interface SettingsViewProps {
   schools: School[];
@@ -25,6 +27,8 @@ interface SettingsViewProps {
   classes: ClassRoster[];
   lessons: Lesson[];
   user: User | null;
+  autoLogoutMinutes: number;
+  onSetAutoLogoutMinutes: (minutes: number) => void;
   onOpenProfile: () => void;
   onClearAllData: () => Promise<void>;
   onImportData: (data: { schools: School[]; teachers: Teacher[]; classes: ClassRoster[]; lessons: Lesson[] }) => Promise<void>;
@@ -36,6 +40,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   classes,
   lessons,
   user,
+  autoLogoutMinutes,
+  onSetAutoLogoutMinutes,
   onOpenProfile,
   onClearAllData,
   onImportData,
@@ -127,6 +133,47 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <p className="text-xs text-slate-500 mt-1">
             Local-first storage status, sample data controls, backup/restore, and ALT terminology reference
           </p>
+        </div>
+      </div>
+
+      {/* Security & Inactivity Timeout Card */}
+      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+        <div className="flex items-center space-x-2">
+          <Clock className="w-5 h-5 text-amber-600" />
+          <h3 className="text-sm font-bold text-slate-900">Security & Auto-Logout</h3>
+        </div>
+        <p className="text-xs text-slate-600 leading-relaxed">
+          Automatically log out when inactive to keep your session secure when leaving desktop instances or shared school computers unattended.
+        </p>
+
+        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+          <div>
+            <label htmlFor="auto-logout-select" className="text-xs font-bold text-slate-900 block">
+              Inactivity Auto-Logout Timeout
+            </label>
+            <span className="text-[11px] text-slate-500">
+              {autoLogoutMinutes === 0
+                ? 'Auto-logout is currently disabled.'
+                : `Session will log out after ${autoLogoutMinutes >= 60 ? `${autoLogoutMinutes / 60} hour(s)` : `${autoLogoutMinutes} minutes`} of inactivity.`}
+            </span>
+          </div>
+
+          <select
+            id="auto-logout-select"
+            value={autoLogoutMinutes}
+            onChange={(e) => {
+              const val = Number(e.target.value);
+              onSetAutoLogoutMinutes(val);
+              showToast(val === 0 ? 'Auto-logout disabled.' : `Auto-logout set to ${val >= 60 ? `${val / 60} hour(s)` : `${val} mins`}.`);
+            }}
+            className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-300 bg-white text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-hidden"
+          >
+            {AUTO_LOGOUT_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
