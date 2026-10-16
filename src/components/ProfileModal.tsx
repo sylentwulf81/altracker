@@ -7,14 +7,18 @@ import {
   X,
   ShieldCheck,
   RefreshCw,
+  Clock,
 } from 'lucide-react';
 import { User, signOut } from '../db/auth';
+import { AUTO_LOGOUT_OPTIONS } from '../hooks/useInactivityLogout';
 
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: User | null;
   lastSynced: string | null;
+  autoLogoutMinutes: number;
+  onSetAutoLogoutMinutes: (minutes: number) => void;
   onRefresh: () => Promise<void>;
 }
 
@@ -23,6 +27,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   onClose,
   user,
   lastSynced,
+  autoLogoutMinutes,
+  onSetAutoLogoutMinutes,
   onRefresh,
 }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -87,14 +93,39 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3 space-y-1">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-slate-100">
               <ShieldCheck className="h-4 w-4 text-emerald-600" />
               <span>Synced to Supabase</span>
             </div>
-            <p className="mt-1 text-[11px] text-slate-500">
+            <p className="text-[11px] text-slate-500">
               Changes save automatically and appear on your other devices. Last
               refreshed {lastSynced ?? 'not yet this session'}.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-3">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-slate-100">
+                <Clock className="h-4 w-4 text-amber-600" />
+                <span>Auto-Logout</span>
+              </div>
+              <select
+                value={autoLogoutMinutes}
+                onChange={(e) => onSetAutoLogoutMinutes(Number(e.target.value))}
+                className="text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-1"
+              >
+                {AUTO_LOGOUT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              {autoLogoutMinutes === 0
+                ? 'Session will remain active indefinitely.'
+                : `Automatically log out after ${autoLogoutMinutes >= 60 ? `${autoLogoutMinutes / 60}h` : `${autoLogoutMinutes}m`} of inactivity.`}
             </p>
           </div>
 

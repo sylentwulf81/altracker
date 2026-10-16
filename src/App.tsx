@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import * as api from './db/api';
 import type { AppData } from './db/api';
-import { onAuthStateChange, getCurrentUser, signInWithGoogle, User } from './db/auth';
+import { onAuthStateChange, getCurrentUser, signInWithGoogle, signOut, User } from './db/auth';
 import { School, Teacher, ClassRoster, Lesson, ActiveTab } from './types';
 import { Navigation } from './components/Navigation';
 import { ScheduleView } from './components/ScheduleView';
@@ -13,6 +13,7 @@ import { ReportsView } from './components/ReportsView';
 import { SettingsView } from './components/SettingsView';
 import { ThemeProvider } from './components/ThemeProvider';
 import { ModeToggle } from './components/ModeToggle';
+import { useInactivityLogout } from './hooks/useInactivityLogout';
 
 const EMPTY: AppData = { schools: [], teachers: [], classes: [], lessons: [] };
 
@@ -41,6 +42,20 @@ export default function App() {
 
   const report = (e: unknown) =>
     setError(e instanceof Error ? e.message : String(e));
+
+  const handleInactivityLogout = useCallback(() => {
+    signOut().catch(report);
+  }, []);
+
+  const {
+    autoLogoutMinutes,
+    setAutoLogoutMinutes,
+    wasAutoLoggedOut,
+    clearAutoLogoutMessage,
+  } = useInactivityLogout({
+    enabled: !!user,
+    onLogout: handleInactivityLogout,
+  });
 
   // --- Auth ----------------------------------------------------------------
 
@@ -251,8 +266,27 @@ export default function App() {
               Sign in to reach your schools, rosters and lessons from any device.
             </p>
           </div>
+
+          {wasAutoLoggedOut && (
+            <div className="max-w-sm w-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl p-3.5 text-left text-xs text-amber-800 dark:text-amber-200 flex items-start justify-between gap-2">
+              <div>
+                <span className="font-bold block mb-0.5">Signed out due to inactivity</span>
+                <span>You were automatically logged out to protect your account session after a period of inactivity.</span>
+              </div>
+              <button
+                onClick={clearAutoLogoutMessage}
+                className="text-amber-600 hover:text-amber-800 font-bold shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <button
-            onClick={() => signInWithGoogle().catch(report)}
+            onClick={() => {
+              clearAutoLogoutMessage();
+              signInWithGoogle().catch(report);
+            }}
             className="rounded-md bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-700"
           >
             Sign in with Google
@@ -352,6 +386,8 @@ export default function App() {
                   classes={classes}
                   lessons={lessons}
                   user={user}
+                  autoLogoutMinutes={autoLogoutMinutes}
+                  onSetAutoLogoutMinutes={setAutoLogoutMinutes}
                   onOpenProfile={() => setIsProfileOpen(true)}
                   onClearAllData={handleClearAllData}
                   onImportData={handleImportData}
@@ -377,6 +413,8 @@ export default function App() {
           onClose={() => setIsProfileOpen(false)}
           user={user}
           lastSynced={lastSynced}
+          autoLogoutMinutes={autoLogoutMinutes}
+          onSetAutoLogoutMinutes={setAutoLogoutMinutes}
           onRefresh={reload}
         />
       </div>
